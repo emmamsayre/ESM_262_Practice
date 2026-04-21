@@ -1,0 +1,25 @@
+---
+title: "lecture_3_assignment"
+author: "Emma Sayre"
+date: "04/21/26"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load libraries
+#| #| include: false
+#| echo: false
+
+library(here)
+library(tidyverse)
+```
+
+```{r}
+#| label: read in data
+#| include: false
+#| echo: false
+
+data <- read.csv(here("Week 1/p301.csv"))
+view(data)
+```
