@@ -23,5 +23,3 @@ library(tidyverse)
 data <- read.csv(here("Week 1/p301.csv"))
 view(data)
 ```
-
-testing revert
