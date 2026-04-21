@@ -1,0 +1,145 @@
+---
+title: "ESM262_HW1"
+author: "Emma Sayre & Eva Juengling Bean"
+date: "04/18/26"
+format: pdf
+editor: visual
+---
+
+```{r}
+#| label: load_libraries
+#| include: false
+#| echo: false
+
+library(tidyverse)
+library(here)
+library(janitor)
+library(dplyr)
+library(patchwork)
+library(tinytex)
+```
+
+### Data Analysis Task #1: Average Snowpack per Year
+
+1.  **Upload Data**
+
+```{r}
+#| label: upload_data
+#| include: true
+#| echo: true
+#| message: false
+
+data <- read_csv(here("data/p301.csv"))
+view(data)
+```
+
+2.  **Calculate Maximum Snowpack per Year**
+
+    ```{r}
+    #| label: max_snowpack
+    #| include: true
+    #| echo: true
+
+    data_snowpack <- data |>
+      select(snowpack, year)
+    view(data_snowpack)
+
+    max_snowpack <- data_snowpack |>
+      group_by(year)|>
+      summarize(max_snowpack = max(snowpack))
+    view(max_snowpack)
+    ```
+
+3.  **Plot Maximum Snowpack per Year**
+
+    ```{r}
+    #| label: max_snowpack_plot
+    #| include: true
+    #| echo: true
+
+    max_snowpack_plot <- ggplot(max_snowpack) +
+      geom_line(aes(x=year, y=max_snowpack))+
+      labs(
+        x="Year", 
+        y= expression("Max. Snowpack" ~ (m/m^2)),
+           title = "Maximum Snowpack per Year") +
+      theme_bw()
+    max_snowpack_plot
+    ```
+
+### Data Analysis Task #2: Average Streamflow per Year
+
+1.  **Calculate Mean Daily Streamflow per Year**
+
+```{r}
+#| label: mean_streamflow
+#| include: true
+#| echo: true
+
+avg_streamflow <- data |>
+  select(streamflow, year) |>
+  group_by(year) |>
+  summarize(avg_streamflow = mean(streamflow)) 
+view(avg_streamflow)
+
+```
+
+2.  **Plot Mean Streamflow per Year**
+
+    ```{r}
+    #| label: streamflow_plot
+    #| include: true
+    #| echo: true
+
+    avg_streamflow_plot <- ggplot(avg_streamflow) +
+      geom_line(aes(x = year, y = avg_streamflow)) +
+      labs(
+        x = "Year",
+        y = expression("Avg. Streamflow" ~ (m/m^2/day)),
+        title = "Mean Daily Streamflow per Year"
+      ) +
+      theme_bw()
+    avg_streamflow_plot
+    ```
+
+### Results
+
+```{r}
+#| label: results
+#| include: true
+#| echo: true
+
+max_snowpack_plot + avg_streamflow_plot + 
+  plot_layout(axes = "collect") +
+  plot_annotation(
+    title = 'Maximum Snowpack and Mean Daily Streamflow (1955-2000)',
+      theme = theme(plot.title = element_text(face = "bold"),
+                    plot.margin = margin(10,20,10,10)),
+    subtitle = 'USFS Experimental Watershed, Southern Sierra Nevada' 
+  )
+```
+
+### Linear Model
+
+```{r}
+#| label: linear_model
+#| include: true
+#| echo: true
+
+snow_stream_data <- 
+  left_join(max_snowpack, avg_streamflow, by = "year")
+view(snow_stream_data)
+
+model <- lm(avg_streamflow ~ max_snowpack, data=snow_stream_data)
+summary(model)
+```
+
+**Motivation:**
+
+We chose to assess the relationship between maximum snowpack and mean daily streamflow in the Sierra Nevada because we wanted to understand how snowpack impacts water availability. We predicted that during years with greater maximum snowpack, there would be a greater daily mean streamflow, and thus greater water availability.
+
+**Results/Conclusions:**
+
+The two figures, "Maximum Snowpack per Year" and "Mean Daily Streamflow per Year" show a positive visual relationship between the variables. Notably, the large snowpack spike observed around 1969 matches the highest recorded streamflow values, supporting this prediction. We conducted a simple linear regression and found that maximum snowpack explains about 37% of the variation in mean daily streamflow (R\$\^2\$ = 0.37, p = 7.22e-06), indicating that snowpack is a signifcant predictor of streamflow. The remaining 63% of variation is unexplained by snowpack alone, suggesting other factors such as temperature or precipitation also influence streamflow.
+
+**Testing Testing for GitHub**
