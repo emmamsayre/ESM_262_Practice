@@ -19,7 +19,7 @@ library(patchwork)
 library(tinytex)
 ```
 
-### Data Analysis Task #1: Average Snowpack per Year
+### Data Analysis Task #1: Average Snowpack per Year!
 
 1.  **Upload Data**
 
