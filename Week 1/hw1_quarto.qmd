@@ -33,7 +33,7 @@ data <- read_csv(here("data/p301.csv"))
 view(data)
 ```
 
-2.  **Calculate Maximum Snowpack per YEAR!!!!!**
+2.  **Calculate Maximum Snowpack per YeArrrr!!!**
 
     ```{r}
     #| label: max_snowpack
