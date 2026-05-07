@@ -1,0 +1,162 @@
+---
+title: "May5_practice"
+format: html
+editor: visual
+---
+
+## Quarto
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+```
+
+```{r}
+possible.dog = c("golden", "husky", "poodle", "pug", "border collie", "great dane")
+
+dog1 = base::sample(possible.dog, size=100, replace=T)
+dog1=as.factor(dog1)
+summary(dog1)
+
+```
+
+You can add options to executable code like this
+
+```{r}
+plot(dog1, col="pink")
+plotitle=sprintf("We like %s", names(which.max(summary(dog1))))
+```
+
+May 7 Looping Practice
+
+```{r}
+
+#simple example - use a loop to sum the numbers from 1-5
+# a = 0+1+2+3+4+5
+a=0
+for (i in 1:5) {
+  a = a+ i
+}
+a
+```
+
+```{r}
+#if you want to keep track of a for each iteration
+#start with a data structure to hold the results
+#there will be 5 iterations, so a vector of length 5
+#initialize to 0
+
+av = rep(x=0, times=5)
+
+# now we can fill in the vector with the sum at each iteration
+# we can use the counter (i) to access the correct element of the vector
+# note that we have to treat the first iteration differently because we don't have a previous value to add to
+
+for (i in 1:5) {
+  if (i==1) {
+    av[i] = 1
+  } else {
+  av[i] = av[i-1]+i
+  }
+}
+av
+```
+
+```{r}
+testnumbers = runif(min=0, max=20, n=100) #100 numbers
+
+total = 0
+nvalues = 100 #100 values
+for (i in 1:nvalues) {
+  total = testnumbers[i]+total
+}
+total/nvalues
+
+mean(testnumbers)
+```
+
+Income Example
+
+```{r}
+#income minus expenses for net income
+#create data
+income = runif(min=1000, max=5000, n=10)
+income
+```
+
+```{r}
+expenses = rnorm(mean = 1500, sd=500, n=10)
+expenses
+```
+
+```{r}
+expenses = ifelse(expenses < 0, 0, expenses)
+
+#data frame
+account = data.frame(income=income, expenses=expenses)
+account$year = seq(from=2000, length.out=nrow(account))
+
+account = account |>
+  mutate(net = income-expenses)
+head(account)
+```
+
+```{r}
+ggplot(account, aes(income, expenses))+geom_point()
+
+account$netloop=NA
+account
+```
+
+```{r}
+for (n in 1:10) {
+  account$netloop[n] = account$income[n] - account$expenses[n] 
+}
+head(account)
+```
+
+```{r}
+account$carryforwardnet = 0
+account$carryforwardnet[1]=account$net[1]
+# now loop - looking backward one year to get previous years carry forward
+for (n in 2:10) {
+  account$carryforwardnet[n] = account$net[n]+account$carryforwardnet[n-1]
+}
+
+# plot - use color to show current year's contribution as positive or negative
+ggplot(account, aes(year, carryforwardnet, fill=net, group=year))+geom_col()+
+  scale_fill_gradient(low="red", high="black")
+
+
+```
+
+Conservation Plan Example
+
+```{r}
+#How often is our creature hunting, socializing, and traveling
+
+# speed limit
+speedthresh = 120
+#create some sample speeds
+speeds = runif(min=0, max=50, n=300)
+
+#setting a named variable for the threshold makes the code easier to read
+hunting_speed = 35
+social_speed = 5
+num_hunting_speeds = 0 #initialize to 0
+num_social_speeds = 0
+for (i in 1:length(speeds)) { 
+  num_huntingspeeds = num_hunting_speeds + ifelse(speeds[i] >= hunting_speed, 1, 0)
+  num_social_speeds = num_social_speeds + ifelse(speeds[i] < social_speed, 1,0)
+  #if speed of i value>hunting speed, add a 1 to running total of hunting speeds; same for social
+}
+num_hunting_speeds
+num_social_speeds
+
+#other speeds are traveling, is remainder
+num_traveling_speeds = length(speeds) - num_hunting_speeds - num_social_speeds
+
+#as a percent of recorded speeds
+num_hunting_speeds/length(speeds)*100
+```
