@@ -1,26 +1,226 @@
 ---
-title: "homework3"
+title: "Homework 3"
+author: "Emma Sayre"
+date: "May 7, 2026"
 format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
-```
-
-You can add options to executable code like this
-
-```{r}
+#| label: load_libs
+#| include: false
 #| echo: false
-2 * 2
+#| message: false
+
+#load libs
+library(tidyverse)
+library(here)
+library(janitor)
+library(dplyr)
+library(ggplot2)
+library(dplyr)
+library(hrbrthemes)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+## Part 1 - Build the Dataset
+
+```{r}
+#| label: build_dataset
+#| include: true
+#| echo: true
+#| output: false
+#| message: false
+
+day <- 1:365
+
+#create sample PM2.5 points
+set.seed(125)
+pm25 = runif(min=0, max=50, n=365)
+pm25
+
+#define seasons
+season <- case_when(
+  day %in% 1:90 ~ "winter",
+  day %in% 91:180 ~ "spring",
+  day %in% 181:270 ~ "summer",
+  day %in% 271:365 ~ "fall"
+) 
+
+season <- as.factor(season)
+
+#leave risk blank to populate later
+risk = NA
+
+#create air quality data frame
+air_quality <- data.frame(
+  day = day,
+  pm25 = pm25,
+  season = season,
+  risk = risk)
+air_quality 
+
+summary(air_quality)
+```
+
+## Part 2 - Classify Risk with a For Loop
+
+```{r}
+#| label: for_loop
+#| include: true
+#| echo: true
+#| message: false
+#| output: false
+
+#set variables
+risk = air_quality$pm25
+unhealthy = 35.4 #or above
+good = 12 #below 12
+num_unhealthy = 0
+num_good = 0
+longest_streak = 0
+current_streak = 0
+
+#Loop
+
+for(i in 1:length(risk)) {
+  #Count unhealthy and good days 
+  num_unhealthy = num_unhealthy + ifelse(risk[i] >= unhealthy, 1, 0)
+  num_good = num_good + ifelse(risk[i] < good, 1, 0) 
+  
+  #Populate risk column 
+  if(risk[i] >= unhealthy) {
+    air_quality$risk[i] = "unhealthy"
+  } else if(risk[i] < good) {
+    air_quality$risk[i] = "good"
+  } else {
+    air_quality$risk[i] = "moderate"
+  }
+  
+  #Track longest streak
+  if(risk[i] >= unhealthy) {
+    current_streak = current_streak + 1
+    longest_streak = max(longest_streak, current_streak)
+  } else {
+    current_streak = 0
+    }
+}
+
+max_unhealthy_streak <- longest_streak
+air_quality
+```
+
+## Part 3 - Seasonal Summary with a For Loop
+
+```{r}
+#| label: seasonal_summary 
+#| include: true
+#| echo: true
+#| message: false
+
+#Find the number of days in each season that fall into unhealthy risk category
+
+unhealthy_winter = 0
+unhealthy_spring = 0
+unhealthy_summer = 0
+unhealthy_fall = 0
+
+for(i in 1:nrow(air_quality)) {
+  if(air_quality$risk[i] == "unhealthy" & air_quality$season[i] == "winter") {
+    unhealthy_winter = unhealthy_winter + 1
+  } else if(air_quality$risk[i] == "unhealthy" & air_quality$season[i] == "spring") {
+    unhealthy_spring = unhealthy_spring + 1
+  } else if(air_quality$risk[i] == "unhealthy" & air_quality$season[i] == "summer") {
+    unhealthy_summer = unhealthy_summer + 1
+  } else if(air_quality$risk[i] == "unhealthy" & air_quality$season[i] == "fall") {
+    unhealthy_fall = unhealthy_fall + 1
+  } }
+
+unhealthy_winter 
+unhealthy_spring 
+unhealthy_summer 
+unhealthy_fall 
+
+```
+
+## Part 4 - Visualize and Report
+
+###### Figure 1: 
+
+```{r}
+#| label: time_series
+#| include: true
+#| echo: false
+#| message: true
+#| warnings: false
+
+# Add months to air_quality dataframe
+air_quality$date <- as.Date(air_quality$day -1, origin= "2025-01-01")
+
+#Time Series Plot
+
+pm25_plot <- ggplot(air_quality, 
+                    aes(x=date, y=pm25, color = season)) +
+  geom_line() +
+  scale_color_manual(
+    name = "Season",
+    values = c("winter"= "skyblue3",
+                                "spring" = "forestgreen",
+                                "summer" = "salmon2",
+                                "fall" = "goldenrod2"),
+    breaks = c("winter", "spring", "summer", "fall"),
+    labels = c("Winter", "Spring", "Summer", "Fall")) +
+  xlab("") +
+  ylab("PM2.5 Concentration (µg/m³)") +
+  scale_x_date(date_labels = "%b") +
+  ggtitle("Los Angeles PM2.5 Concentrations in 2025", 
+          subtitle= sprintf("Longest Unhealthy Air Quality Streak: %d days", max_unhealthy_streak)) +
+  theme_bw()
+pm25_plot
+
+```
+
+###### Figure 2: 
+
+```{r}
+#| label: bar_chart
+#| include: true
+#| echo: false
+#| message: false
+#| warning: false
+
+bar_chart <- ggplot(air_quality, aes(x=risk, fill = risk)) +
+  geom_bar() +
+  geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5) +
+  scale_fill_manual(
+    name = "Risk Category",
+    values = c("good"= "forestgreen",
+               "moderate" ="goldenrod2",
+               "unhealthy" = "indianred3"),
+    breaks = c("good", "moderate", "unhealthy"),
+    labels = c("Good", "Moderate", "Unhealthy")) +
+  scale_x_discrete(limits = c("good", "moderate", "unhealthy"),
+                   labels = c("Good", "Moderate", "Unhealthy")) +
+  xlab("") +
+  ylab("Number of Days") +
+  ggtitle("Total Number of Days in Each Risk Category", 
+          subtitle = sprintf("Longest Unhealthy Air Quality Streak: %d days", max_unhealthy_streak)) +
+  theme_bw()
+bar_chart
+
+```
+
+#### Summary of Findings
+
+According to Figure 1, PM2.5 concentrations in Los Angeles fluctuated throughout all of 2025 despite the season, ranging from 0.01-49.83 µg/m³. The average concentration of PM2.5 was 26.08 µg/m³, falling into the moderate air quality range. Figure 2 displays this information further by showing that 172 days in 2025 fell into the moderate range, 119 were unhealthy, and 74 were good. Overall, Los Angeles is seeing few good air quality days in comparison to moderate and unhealthy days, indicating the potential for serious public health consequences. PM2.5 in the air can enter people's lungs and bloodstreams, causing strokes, heart attacks, asthma, respiratory disease, lung cancer, and even death. Thus, environmental managers should work to identify major pollution sources and coordinate with politicians to implement policies such as emission caps.
+
+```{r}
+#| label: stats
+#| include: false
+#| echo: false
+#| message: false
+#| warning: false
+
+min(air_quality$pm25)
+max(air_quality$pm25)
+mean(air_quality$pm25)
+```

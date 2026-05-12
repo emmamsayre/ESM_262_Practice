@@ -1,0 +1,146 @@
+---
+title: "May12_Practice"
+format: html
+editor: visual
+---
+
+## Nested For Loops
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+```
+
+```{r}
+# simple example of nested loops - compute
+# the sum of all the elements in a matrix keeping track of something at each location
+# create some sample data
+ntime = 5
+nlocation = 3
+# matrix function in R lets you initialize with data
+# here we are creating a matrix with nlocation rows and nobs columns, filled with integers between 1 and 10
+creatureobs = matrix(sample(1:10, ntime*nlocation, replace=TRUE), nrow=nlocation)
+colnames(creatureobs) = c("time1", "time2", "time3", "time4", "time5")
+rownames(creatureobs) = c("east", "west", "north")
+# check to see that it is a matrix with rows and columns
+str(creatureobs)
+creatureobs
+```
+
+```{r}
+# nested for loop: use t as counter for time; l as counter for location
+# initialization
+# outer loop for location
+totalsum = 0
+for (l in 1:nlocation) {
+  # inner loop for observations
+  for (t in 1:ntime) {
+     totalsum = totalsum + creatureobs[l,t]
+  }
+}
+totalsum
+```
+
+```{r}
+## to see if work print out at each location and time step
+totalsum = 0
+for (l in 1:nlocation) {
+  # inner loop for observations
+  for (t in 1:ntime) {
+     totalsum = totalsum + creatureobs[l,t]
+     # use sprintf to print out the location, time, and sum so far, cat just prints out the string
+     cat(sprintf("\nfor counter l=%d t=%d, location: %s, time: %s, sum so far: %s", l, t, rownames(creatureobs)[l], colnames(creatureobs)[t], totalsum)) 
+  }
+}
+```
+
+## For Loop Matrix
+
+```{r}
+# create some sample data
+nobs = 4
+nlocation = 5
+# matrix function in R lets you initialize with data
+creatureobs = matrix(runif(nobs*nlocation, min=0, max=100), nrow=nlocation)
+# check to see that it is a matrix with rows and columns
+str(creatureobs)
+creatureobs
+```
+
+```{r}
+#nested for loop: use o as counter for observation; l as counter for location
+#outer loop for location
+
+hunting_speed = 60
+num_hunting_speeds = 0
+for(l in 1:nlocation) {
+  for(o in 1:nobs) {
+    num_hunting_speeds = num_hunting_speeds + ifelse(creatureobs[l,o] >= hunting_speed, 1, 0) 
+    #if condition is true, we add 1; if false, add 0
+  }
+}
+num_hunting_speeds
+```
+
+```{r}
+#as percent
+num_hunting_speeds/(nobs*nlocation)*100
+```
+
+```{r}
+#harder task! number of hunting speeds where you have hunting in current & neighboring location
+#in if statement test 2 things: if the current place [l,o] is above threshold, and is hunting speed in next location also above hunting speed...only add 1 if both are above (check neighbors)
+
+
+# nested for loop: use o as counter for observation; l as counter for location
+# outer loop for location
+num_hunting_speeds_neighbors=0
+
+# notice that we only go to the second last location
+for (l in 1:(nlocation-1)) {  #can only go to nlocation-1 bc in loop the last location won't have a neighbor (ex final location + 1 doesn't exist)
+  # inner loop for observations
+  for (o in 1:nobs) {
+      if (creatureobs[l,o] >= hunting_speed & creatureobs[l+1,o] > hunting_speed) {
+         checkneigh = 1
+      } else {
+         checkneigh = 0
+      }
+     num_hunting_speeds_neighbors = num_hunting_speeds_neighbors + checkneigh
+  }
+}
+num_hunting_speeds_neighbors
+```
+
+```{r}
+#as percent of all observations
+num_hunting_speeds_neighbors/((nobs*(nlocation-1)))*100
+```
+
+## While Loop
+
+```{r}
+# initialize parameters
+pol_in = 10 # pollution added each day
+pol_out_base = 5 # base pollution removed each day
+threshold = 100 # pollution threshold
+
+# initialize pollution level and day counter
+pollution_level = 0
+day = 0
+
+maxday = 365
+# while loop to simulate pollution levels over time
+# we use && for AND because we want to check both conditions - that pollution level is below threshold and that we haven't exceeded max days
+
+while ((pollution_level < threshold) && (day < maxday)) {
+  # update pollution level
+  air_temp = rnorm(mean=20, sd=5, n=1) #
+  pol_out = pol_out_base * (1 + 0.01*air_temp) # calculate pollution removed based on air temp
+  pollution_level = pollution_level + pol_in - pol_out # update pollution level
+  day = day + 1 # increment day counter
+}
+day
+
+cat(sprintf("It takes %d days for pollution to exceed the threshold of %d, final level: %.1f", day, threshold, pollution_level))
+```
