@@ -1,0 +1,36 @@
+---
+title: "Week5_Practice"
+format: html
+editor: visual
+---
+
+## Lists
+
+```{r}
+#| label: list
+#| include: true
+#| echo: true
+#| message: false
+
+#make a list
+sale = list(id=2, quality="high",
+            contents=c("apple", "cherry"), cost=c(4,5))
+sale
+
+#In terminal:
+
+#To find 3rd item in the list: sale[[3]]
+#To find 2nd item sold: sale$content[2] or sale[[3]][2]
+#To add another element: sale$location = "farmers market"
+#To remove an element: sale$location = NULL
+
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).

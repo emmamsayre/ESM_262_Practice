@@ -144,7 +144,7 @@ unhealthy_fall
 
 ## Part 4 - Visualize and Report
 
-###### Figure 1: 
+###### Figure 1:
 
 ```{r}
 #| label: time_series
@@ -179,7 +179,7 @@ pm25_plot
 
 ```
 
-###### Figure 2: 
+###### Figure 2:
 
 ```{r}
 #| label: bar_chart

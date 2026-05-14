@@ -38,9 +38,9 @@ D - Simpson's Diversity Index (range 0 to 1)
 
 **Formula:**
 
-D = Σ \[n(n-1)\] / \[N(N-1)\]
+$$D = \frac{\sum n(n-1)}{N(N-1)}$$
 
-## Implement Function 
+## Implement Function
 
 ```{r}
 #| label: implement_function
@@ -71,11 +71,21 @@ biodiversity = function(n, N) {
 #| message: true
 
 #Generate sample data
-trees = c("oak", "oak", "oak", "pine", "pine", "maple", "maple", "pine", "oak", "birch", "oak", "oak", "oak", "pine") 
+animals = c("cat", "cat", "cat", "dog", "dog", "mouse", "mouse", "rabbit", "cat", "rabbit", "rabbit", "dog", "rabbit", "mouse") 
 
-species = as.factor(trees)
+species = as.factor(animals)
 n = as.vector(table(species))
-N = length (trees )
+N = length (animals)
 
 D = biodiversity(n,N)
+```
+
+```{r}
+#| label: class_ex
+#| include: true
+#| echo: true
+#| message: true
+
+#Modify diversity function to return a list with Simpson D, most frequent species, number of distinct species
+
 ```
