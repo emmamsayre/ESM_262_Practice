@@ -1,0 +1,81 @@
+---
+title: "Homework 4"
+author: "Emma Sayre"
+date: "May 13, 2026"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load_libs
+#| include: false
+#| echo: false
+#| message: false
+
+library(tidyverse)
+library(here)
+library(janitor)
+
+```
+
+## Contract
+
+**Input:**
+
+n - total number of organisms of a particular species
+
+N - total number of organisms of all species
+
+**Output:**
+
+D - Simpson's Diversity Index (range 0 to 1)
+
+- Probability that two indiviudals randomly selected from a sample will belong to the same species
+
+- D = 0 indiciates infinite diversity; D = 1 indicates no diversity
+
+**Parameters:** None
+
+**Formula:**
+
+D = Σ \[n(n-1)\] / \[N(N-1)\]
+
+## Implement Function 
+
+```{r}
+#| label: implement_function
+#| include: true
+#| echo: true
+#| message: false
+
+#' Simpson Biodiversity
+#' 
+#' @param n total number of orgs. of a species
+#' @param N total number of orgs. of all species
+#' @return D - Simpson's Diversity Index (0 to 1)
+#' 
+#' function definition 
+biodiversity = function(n, N) {
+  result = sum(n*(n-1)) / (N * (N-1))
+  return(result)
+}
+
+```
+
+## Test w/ Sample Data
+
+```{r}
+#| label: test
+#| include: true
+#| echo: true
+#| message: true
+
+#Generate sample data
+trees = c("oak", "oak", "oak", "pine", "pine", "maple", "maple", "pine", "oak", "birch", "oak", "oak", "oak", "pine") 
+
+species = as.factor(trees)
+n = as.vector(table(species))
+N = length (trees )
+
+D = biodiversity(n,N)
+```
